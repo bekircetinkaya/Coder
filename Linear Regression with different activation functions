@@ -1,0 +1,71 @@
+import numpy as np
+
+# tanh()
+def activatetanh(x, derive=False):
+    if derive==True:
+        return 1 - np.tanh(x) * np.tanh(x)
+    return np.tanh(x)
+
+# Rectified Linear Units
+def activatereLu(x, derive=False):
+    if derive==True:
+        if x >= 0:
+            return 1
+        else:
+            return 0
+    if x >= 0:
+        return x
+    else:
+        return 0
+
+# softmax
+def softmax(w, t=1.0):
+    e = np.exp(w/t)
+    dist = e / np.sum(e)
+    return dist
+
+# sigmoid
+def activate(x, derive=False):
+    if derive==True:
+        return x*(1-x)
+    return 1/(1 + np.exp(-x))
+
+loop = 600000
+#Learning rate
+l_r = 0.01
+
+i_p = np.loadtxt('in.txt', dtype=int)
+o_p = np.loadtxt('out.txt', dtype=int)
+
+w_0 = 2*np.random.random((4, 4)) - 1
+w_1 = 2*np.random.random((4, 1)) - 1
+
+l_2e = np.zeros((4, 1), dtype=float)
+l_2g = np.zeros((4, 1), dtype=float)
+l_1e = np.zeros((4, 4), dtype=float)
+l_1g = np.zeros((4, 4), dtype=float)
+
+for i in range(0, loop, 1):
+    l_1 = activate(np.dot(i_p, w_0))
+    l_2 = activate(np.dot(l_1, w_1))
+    for ii in range(0, 4, 1):
+        l_2e[ii] = o_p[ii] - l_2[ii]
+
+    if (i % 10000) == 0:
+        print(i+ 10000, "Error:" + str(np.mean(np.abs(l_2e))))
+
+    for ii in range(0, 4, 1):
+        l_2g[ii] = 1*(l_2e[ii] *activate(l_2[ii], derive=True))
+    l_1e = np.dot(l_2g, w_1.T)
+    for ii in range(0, 4, 1):
+        l_1g[ii] = 1*(l_1e[ii] *activate(l_1[ii], derive=True))
+
+    w_1 += np.dot(l_1, l_2g)
+    w_0 += np.dot(l_1g, i_p.T)
+print(l_2)
+
+#result
+#[[  9.99998800e-01]
+# [  8.67971965e-04]
+# [  9.99677420e-01]
+# [  9.99998800e-01]]
