@@ -1,0 +1,82 @@
+import numpy as np
+import random
+
+# tanh()
+def activatetanh(x, derive=False):
+    if derive==True:
+        return 1 - np.tanh(x) * np.tanh(x)
+    return np.tanh(x)
+
+# Rectified Linear Units
+def activatereLu(x, derive=False):
+    if derive==True:
+        if x >= 0:
+            return 1
+        else:
+            return 0
+    if x >= 0:
+        return x
+    else:
+        return 0
+
+# softmax
+def softmax(w, t=1.0):
+    e = np.exp(w/t)
+    dist = e / np.sum(e)
+    return dist
+
+# sigmoid
+def activate(x, derive=False):
+    if derive==True:
+        return x*(1-x)
+    return 1/(1 + np.exp(-x))
+
+np.random.seed(1)
+loop = 1200000
+#Learning rate
+l_r = 0.2
+
+i_p = np.loadtxt('in.txt', dtype=int)
+o_p = np.loadtxt('out.txt', dtype=int)
+
+#Weight 1
+w_1 = 2*np.random.random((4, 4)) - 1
+#Weight 2
+w_2 = 2*np.random.random((4, 1)) - 1
+
+bias_1 = 2 * np.random.random((4, 4)) - 1
+bias_2 = 2 * np.random.random((4, 4)) - 1
+# Layer 2 error
+l_2e = np.zeros((4, 1), dtype=float)
+# Layer 2 gradient
+l_2g = np.zeros((4, 1), dtype=float)
+# Layer 1 error
+l_1e = np.zeros((4, 4), dtype=float)
+# Layer 1 gradient
+l_1g = np.zeros((4, 4), dtype=float)
+
+for i in range(0, loop, 1):
+    l_1 = activate(np.dot(i_p + bias_1, w_1))
+    l_2 = activate(np.dot(l_1 + bias_2, w_2))
+
+    for ii in range(0, 4, 1):
+        l_2e[ii] = o_p[ii] - l_2[ii]
+
+    if (i % 10000) == 0:
+        print(i + 10000, "Error:" + str(np.mean(np.abs(l_2e))))
+
+    for ii in range(0, 4, 1):
+        l_2g[ii] = l_r*(l_2e[ii] *activate(l_2[ii], derive=True))
+#    l_2g = l_2e * activate(l_2, derive=True)*l_2
+    bias_2 += l_r*l_2g
+
+    l_1e = np.dot(l_2g, w_1.T)
+    for ii in range(0, 4, 1):
+        l_1g[ii] = l_r*(l_1e[ii] *activate(l_1[ii], derive=True))
+#    l_1g = l_1e*activate(l_1, derive=True)
+    bias_1 += l_r * l_1g
+
+    w_2 += np.dot(l_1, l_2g)
+    w_1 += np.dot(l_1g, i_p.T)
+
+print(l_2)
