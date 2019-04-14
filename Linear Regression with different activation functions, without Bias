@@ -30,35 +30,51 @@ def activate(x, derive=False):
         return x*(1-x)
     return 1/(1 + np.exp(-x))
 
-loop = 600000
+np.random.seed(1)
+loop = 120000
 #Learning rate
-l_r = 0.01
+l_r = 0.2
 
+# streaming the files
 i_p = np.loadtxt('in.txt', dtype=int)
 o_p = np.loadtxt('out.txt', dtype=int)
 
+# Weight matrices
 w_0 = 2*np.random.random((4, 4)) - 1
 w_1 = 2*np.random.random((4, 1)) - 1
 
+# layer 2 error
 l_2e = np.zeros((4, 1), dtype=float)
+
+# layer 2 gradient
 l_2g = np.zeros((4, 1), dtype=float)
+
+# layer 1 error
 l_1e = np.zeros((4, 4), dtype=float)
+
+# layer 1 gradient
 l_1g = np.zeros((4, 4), dtype=float)
 
 for i in range(0, loop, 1):
     l_1 = activate(np.dot(i_p, w_0))
     l_2 = activate(np.dot(l_1, w_1))
+    
     for ii in range(0, 4, 1):
         l_2e[ii] = o_p[ii] - l_2[ii]
 
     if (i % 10000) == 0:
         print(i+ 10000, "Error:" + str(np.mean(np.abs(l_2e))))
 
+#backpropagation
     for ii in range(0, 4, 1):
-        l_2g[ii] = 1*(l_2e[ii] *activate(l_2[ii], derive=True))
+        l_2g[ii] = l_r*(l_2e[ii] *activate(l_2[ii], derive=True))
+
+#    l_2g = l_2e * activate(l_2, derive=True)*l_2
     l_1e = np.dot(l_2g, w_1.T)
     for ii in range(0, 4, 1):
-        l_1g[ii] = 1*(l_1e[ii] *activate(l_1[ii], derive=True))
+        l_1g[ii] = l_r*(l_1e[ii] *activate(l_1[ii], derive=True))
+
+#    l_1g = l_1e*activate(l_1, derive=True)
 
     w_1 += np.dot(l_1, l_2g)
     w_0 += np.dot(l_1g, i_p.T)
