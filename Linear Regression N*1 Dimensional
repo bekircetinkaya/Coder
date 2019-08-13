@@ -1,0 +1,81 @@
+import numpy as np
+#from numpy import ndarray
+#import pandas as pd
+#import matplotlib.pyplot as plt
+#import math
+#from statistics import mean
+import random
+
+
+def activate(x, derive=False):
+    if derive==True:
+        return x*(1-x)
+    return 1/(1 + np.exp(-x))
+
+
+def save():
+    np.savetxt('W_1.txt', w_1, fmt='%f')
+    np.savetxt('W_2.txt', w_2, fmt='%f')
+
+    np.savetxt('Bias_1.txt', bias_1, fmt='%f')
+    np.savetxt('Bias_2.txt', bias_2, fmt='%f')
+
+
+loop = 500
+
+#divide ratio of mean error
+dr = 10
+
+#learning rate previously 0.25 and 0.01 ( 0.01 200)
+lr = 0.4
+
+# Array Size
+LengthofArray = 6
+
+# Arbitrary choosen values
+input_layer = np.random.random((LengthofArray, 1))
+np.savetxt('in.txt', input_layer, fmt='%f')
+output_layer = np.random.random((LengthofArray, 1))
+np.savetxt('out.txt', output_layer, fmt='%f')
+
+l_1 = np.zeros((LengthofArray, 1), dtype=float)
+l_2 = np.zeros((LengthofArray, 1), dtype=float)
+
+l_1e = np.zeros((LengthofArray, 1), dtype=float)
+l_2e = np.zeros((LengthofArray, 1), dtype=float)
+
+l_1g = np.zeros((LengthofArray, 1), dtype=float)
+l_2g = np.zeros((LengthofArray, 1), dtype=float)
+
+w_1 = np.random.random((LengthofArray, LengthofArray)) - 0.5
+w_2 = np.random.random((LengthofArray, LengthofArray)) - 0.5
+
+bias_1 = np.random.random((LengthofArray, 1)) - 0.5
+bias_2 = np.random.random((LengthofArray, 1)) - 0.5
+
+for j in range(0, loop, 1):
+
+    l_1 = activate(np.dot(w_1, input_layer + bias_1))
+    l_2 = activate(np.dot(w_2, l_1 + bias_2))
+
+    l_2e = l_2 - output_layer
+
+    if (j % dr) == 0:
+        print(j, "Error:" + str(np.mean(np.abs(l_2e))))
+
+    for k in range(0, LengthofArray, 1):
+        l_2g[k] = lr * l_2e[k] * activate(l_2[k], derive=True)
+
+    l_1e = np.dot(w_1.T, l_2g)
+
+    for k in range(0, LengthofArray, 1):
+        l_1g[k] = lr * l_1e[k] * activate(l_1[k], derive=True)
+
+    bias_2 += lr * l_2g
+    bias_1 += lr * l_1g
+
+    w_2 -= np.dot(l_2e, l_2.T)
+    w_1 -= np.dot(l_1e, l_1.T)
+
+print('Differance Matrix:')
+print(l_2-output_layer)
