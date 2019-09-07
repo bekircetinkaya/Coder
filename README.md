@@ -1,5 +1,5 @@
 # Machine-Learning
-Complete Machine Learning Examples codes in Python
+Complete Linear Regression (Machine Learning) Examples codes in Python
 
 I should update in future NLP, Recommendation system, k-NN and SVM algorithm.
 
